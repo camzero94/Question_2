@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+
+  rabbitmq:
+    container_name: camilo-rabbitmq-container
+    image: rabbitmq:latest
+    environment:
+      hostname: camilo-rabbitmq
+    ports:
+      - "5672:5672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+      start_period: 5s
+
+    networks:
+      - rabbitmq-network
+
+
+networks:
+  rabbitmq-network:
+    driver: bridge  
