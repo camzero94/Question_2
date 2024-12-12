@@ -1,48 +1,98 @@
 # Question 2: Rabbitmq
 ### How to run it
-If you dont have  python interpreter installed:
-1. For Mac OS 
+1. If you dont have  python interpreter installed:
+
+For Windows OS
+```sh
+https://www.python.org/downloads/
+```
+
+For Mac OS 
 ```sh
 brew install python
 ```
-2. For Linux  OS 
+For Linux  OS 
 ```sh
 sudo apt update
 sudo apt install python3
 ```
 
-Go inside the Question_1/ folder and run the following:
+Create the virtual environment
 ```sh
-python3 main.py
+python3 -m venv my_venv
 ```
+
+Activate the virtual environment
+```sh
+source my_venv/bin/activate
+```
+Install the requirements
+```sh
+pip install -r requirements.txt
+```
+
+2. Run the Rabbitmq container using docker-compose
+
+If you dont have docker-compose installed:
+For Mac OS 
+```sh
+brew install docker-compose
+```
+
+For Linux  OS 
+```sh
+sudo apt update
+sudo apt install docker-compose
+```
+
+For Windows OS
+```sh
+https://docs.docker.com/compose/install/
+```
+
+Go inside the Question_2/ folder and run the following:
+```sh
+docker-compose up --build -d
+```
+This will pull the rabbitmq image and run it in the background.
+
+3. Run the main.py program it is a rabbitmq client to connect , configure and send the message "Hello World!" to the queue .
+```sh
+python main.py
+```
+
 ![Alt Text](./media/rabbitmq.gif)
 
 ### Description and directory  structure 
 ```sh
-.
-├── Readme.md
-├── __init_.py
-├── core
-│   ├── __init__.py
-│   ├── __pycache__
-│   ├── consumer.py
-│   └── producer.py
-└── main.py
-3 directories, 6 files
-```
-**Note** : I decided to create a **consumer and a producer class**  in the **consumer.py** and **producer.py** files, thinking that those classes would get more functionality in the future, besides from only 'consuming' and 'producing'. I only leave the main.py (main process) file to create , execute and manage the lifecycle of  the threads.
+├── README.md
+├── docker-compose.yml
+├── main.py
+├── media
+│   └── rabbitmq.gif
+├── open_env
+│   ├── bin
+│   ├── include
+│   ├── lib
+│   └── pyvenv.cfg
+└── requirements.txt
 
+6 directories, 6 files
+```
+**Setup Rabbitmq**:
+- Exchange: is set to default. It means that the routing key will match with the queue name. 
+- Queue: The queue is named "test_queue" and it is durable. It means that the queue will survive a broker restart.
+- ack: The message is acknowledged by the consumer. It means that the message is removed from the queue when the consumer receives it.
+- Channel management: The channel is closed after the message is sent. And each function send_message() and consume_message() creates a new channel. **Multiplexing happens** 
+
+### Requirements.txt
+```sh
+pika==1.3.2
+```
 
 ## Some considerations 
-Because of the use of multithreading  there a some overhead considerations
-#### Global interpreter Lock: 
-The GIL prevents the use of multiple CPU cores. So python threads only can use a single cpu core, this can lead to inefficiencies.
-#### Context Switching between threads:
-When switching between the two threads **consumer thread** and **producer thread** context it can lead to an overhead. Because the OS must save and restore the state each time.
-#### Synchronization Costs
-The use of **Queue** class as a shared queue might lead to some overhead. Mainly because there are some locks that the class use internally.
 
-#### 10 seconds Rule 
-Because this smalls overheads tend to add it everytime the consumer.consume and producer.produce functions are executed. There is not 100% accurate in the 0.1 seconds mark or the 0.15 seconds mark. This lead to in some cases the threads to be shutdown before it gets to 10 seconds. 
-For example the program terminate at 9.85s.
+When sending the message the connection is close. It is a good practice to close the connection after the message is sent. 
+
+When consuming the message the program hang so the user can decide to exit by pressing Ctrl + C. This is because I want to show the message is consumed only once and the queue is empty.
 

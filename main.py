@@ -1,7 +1,4 @@
 import pika
-import time
-from dotenv import load_dotenv
-import os
 
 
 def send_message(message:str = 'Hello World!'):
